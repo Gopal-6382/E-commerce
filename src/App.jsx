@@ -11,6 +11,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Footer from "./components/Footer";
 const App = () => {
   return (
     <div className="px-4 sm:px[5vw] md:px[7vw] lg:px-[9vw]">
@@ -25,7 +26,8 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/place-order" element={<PlaceOrder />} />
         <Route path="/orders" element={<Orders />} />
-      </Routes>
+      </Routes> 
+      <Footer/> 
     </div>
   );
 };

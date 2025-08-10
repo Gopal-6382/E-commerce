@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { useState } from "react";
 import { assets } from "./../assets/assets.js";
 
@@ -6,7 +6,9 @@ const Navbar = () => {
   const [visible, setVisible] = useState(false);
   return (
     <div className="flex items-center justify-between py-5 font-medium">
-      <img src={assets.logo} className="w-36" alt="" />
+      <Link to="/">
+        <img src={assets.logo} className="w-36" alt="" />
+      </Link>
       <ul className=" sm:flex gap-5 text-sm text-gray-700 hidden">
         <NavLink className="flex flex-col items-center gap-1" to="/">
           <p>Home</p>
@@ -92,10 +94,22 @@ const Navbar = () => {
             <img src={assets.dropdown_icon} alt="" className="h-4 rotate-180" />
             <p>Back</p>
           </div>
-          <NavLink onClick={false} className="py-2 pl-6 border" to="/">Home</NavLink>
-          <NavLink onClick={false} className="py-2 pl-6 border" to="/collection">Collection </NavLink>
-          <NavLink onClick={false} className="py-2 pl-6 border" to="/about">About</NavLink>
-          <NavLink onClick={false} className="py-2 pl-6 border" to="/contact">Contact</NavLink>
+          <NavLink onClick={false} className="py-2 pl-6 border" to="/">
+            Home
+          </NavLink>
+          <NavLink
+            onClick={false}
+            className="py-2 pl-6 border"
+            to="/collection"
+          >
+            Collection{" "}
+          </NavLink>
+          <NavLink onClick={false} className="py-2 pl-6 border" to="/about">
+            About
+          </NavLink>
+          <NavLink onClick={false} className="py-2 pl-6 border" to="/contact">
+            Contact
+          </NavLink>
         </div>
       </div>
     </div>

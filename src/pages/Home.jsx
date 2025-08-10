@@ -1,11 +1,17 @@
 import Hero from "../components/Hero";
 import LatestCollection from "../components/LatestCollection";
+import BestSeller from "../components/BestSeller"; // import it
+import OurPolicy from "../components/OurPolicy";
+import NewsletterBox from "../components/NewsletterBox";
 
 const Home = () => {
   return (
-    <div >
+    <div>
       <Hero />
-      <LatestCollection/> 
+      <LatestCollection />
+      <BestSeller />
+      <OurPolicy />
+      <NewsletterBox />
     </div>
   );
 };
