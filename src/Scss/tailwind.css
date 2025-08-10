@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your SCSS variables, mixins, etc. */
+$brand-color: #4f46e5;
+
+body {
+  background-color: $brand-color;
+}
