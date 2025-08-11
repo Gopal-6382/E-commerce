@@ -3,9 +3,10 @@ import { products } from "../assets/assets";
 import Title from "../components/Title";
 import { ShopContext } from "../context/ShopContext";
 import { assets } from "./../assets/assets";
+import CartTotal from "../components/CartTotal";
 
 const Card = () => {
-  const { products, currency, cartItems, updateQuantity } =
+  const { products, currency, cartItems, updateQuantity, navigate } =
     useContext(ShopContext);
 
   const [cartData, setCartData] = useState([]);
@@ -63,6 +64,15 @@ const Card = () => {
                     type="number"
                     className="border rounded w-12 sm:w-16 px-2 py-1 text-center"
                     min={1}
+                    onChange={(e) =>
+                      e.target.value === "" || e.target.value === "0"
+                        ? null
+                        : updateQuantity(
+                            item._id,
+                            item.size,
+                            Number(e.target.value)
+                          )
+                    }
                     defaultValue={item.quantity}
                   />
                 </div>
@@ -78,14 +88,22 @@ const Card = () => {
                   src={assets.bin_icon}
                   alt="Remove"
                   className="w-5 h-5 cursor-pointer hover:opacity-70"
-                  onClick={() =>
-                    updateQuantity(item._id, item.size, item.quantity)
-                  }
+                  onClick={() => updateQuantity(item._id, item.size, 0)}
                 />
               </div>
             </div>
           );
         })}
+      </div>
+      <div className="flex justify-end my-20">
+        <div className="w-full sm:w-[450px]">
+          <CartTotal />
+          <div className="w-full text-end">
+            <button onClick={() => navigate("/place-order")} className="bg-black text-white text-sm my-8 py-3 px-8 rounded">
+              Process to Checkout
+            </button>
+          </div>
+          </div>
       </div>
     </div>
   );
