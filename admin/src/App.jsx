@@ -1,9 +1,7 @@
 import "./Scss/tailwind.css";
 
 const App = () => {
-  return (
-    <div>App</div>
-  )
-}
+  return <div className="my-10"></div>;
+};
 
-export default App
+export default App;
