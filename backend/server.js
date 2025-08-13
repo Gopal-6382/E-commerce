@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// Optional dependencies - wrap in try-catch
+// Optional dependencies
 let helmet, rateLimit, morgan;
 try {
   helmet = (await import('helmet')).default;
@@ -17,7 +17,7 @@ try {
 
 dotenv.config();
 
-// ES modules fix for __dirname
+// Fix for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -38,12 +38,16 @@ const connectDB = async () => {
 await connectDB();
 
 // Middleware
+
+// Allow ALL origins (for dev only)
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+  origin: '*', // Allow all origins
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Only use security middleware if packages are installed
+// Security middlewares if available
 if (helmet) app.use(helmet());
 if (morgan) app.use(morgan('dev'));
 
@@ -53,7 +57,7 @@ app.use(express.urlencoded({ extended: true }));
 // Rate limiting if package is available
 if (rateLimit) {
   const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100
   });
   app.use(limiter);
@@ -75,12 +79,13 @@ app.get('/', (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
-    success: false, 
-    message: err.message || 'Something broke!' 
+  res.status(500).json({
+    success: false,
+    message: err.message || 'Something broke!'
   });
 });
 
+// Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

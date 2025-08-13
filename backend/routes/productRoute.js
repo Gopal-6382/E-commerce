@@ -26,7 +26,7 @@ router.post(
 router.delete("/:id", adminAuth, removeProduct);
 
 // Public routes
-router.get("/", listProducts);
+router.get("/list", listProducts);
 router.get("/:id", singleProduct);
 
 export default router;
