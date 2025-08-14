@@ -28,63 +28,64 @@ const Collection = () => {
     );
   };
 
-const applyFilters = () => {
-  let filtered = products;
+  const applyFilters = () => {
+    let filtered = products;
 
-  // ----------- BEST SEARCH FUNCTION -----------
-  if (search.trim() !== "") {
-    const query = search.toLowerCase().trim();
+    // ----------- BEST SEARCH FUNCTION -----------
+    if (search.trim() !== "") {
+      const query = search.toLowerCase().trim();
 
-    filtered = filtered
-      .map(product => {
-        let score = 0;
+      filtered = filtered
+        .map((product) => {
+          let score = 0;
 
-        // Exact or strong matches in name get higher score
-        if (product.name?.toLowerCase().includes(query)) score += 3;
+          // Exact or strong matches in name get higher score
+          if (product.name?.toLowerCase().includes(query)) score += 3;
 
-        // Matches in description
-        if (product.description?.toLowerCase().includes(query)) score += 2;
+          // Matches in description
+          if (product.description?.toLowerCase().includes(query)) score += 2;
 
-        // Matches in category or subcategory
-        if (product.category?.toLowerCase().includes(query)) score += 1;
-        if (product.subCategory?.toLowerCase().includes(query)) score += 1;
+          // Matches in category or subcategory
+          if (product.category?.toLowerCase().includes(query)) score += 1;
+          if (product.subCategory?.toLowerCase().includes(query)) score += 1;
 
-        // Matches in sizes
-        if (product.sizes?.some(size => size.toLowerCase() === query)) score += 1;
+          // Matches in sizes
+          if (product.sizes?.some((size) => size.toLowerCase() === query))
+            score += 1;
 
-        return { ...product, score };
-      })
-      .filter(p => p.score > 0) // only keep relevant matches
-      .sort((a, b) => b.score - a.score); // higher score first
-  }
+          return { ...product, score };
+        })
+        .filter((p) => p.score > 0) // only keep relevant matches
+        .sort((a, b) => b.score - a.score); // higher score first
+    }
 
-  // ----------- CATEGORY FILTER -----------
-  if (category.length > 0) {
-    filtered = filtered.filter((product) =>
-      category.includes(product.category)
-    );
-  }
+    // ----------- CATEGORY FILTER -----------
+    if (category.length > 0) {
+      filtered = filtered.filter((product) =>
+        category.includes(product.category)
+      );
+    }
 
-  // ----------- SUBCATEGORY FILTER -----------
-  if (subCategory.length > 0) {
-    filtered = filtered.filter((product) =>
-      subCategory.includes(product.subCategory)
-    );
-  }
+    // ----------- SUBCATEGORY FILTER -----------
+    if (subCategory.length > 0) {
+      filtered = filtered.filter((product) =>
+        subCategory.includes(product.subCategory)
+      );
+    }
 
-  // ----------- SORTING -----------
-  if (sortType === "low-to-high") {
-    filtered = [...filtered].sort((a, b) => a.price - b.price);
-  } else if (sortType === "high-to-low") {
-    filtered = [...filtered].sort((a, b) => b.price - a.price);
-  }
+    // ----------- SORTING -----------
+    if (sortType === "low-to-high") {
+      filtered = [...filtered].sort((a, b) => a.price - b.price);
+    } else if (sortType === "high-to-low") {
+      filtered = [...filtered].sort((a, b) => b.price - a.price);
+    }
 
-  setFilteredProducts(filtered);
-};
+    setFilteredProducts(filtered);
+  };
 
   useEffect(() => {
     applyFilters();
-  }, [products, search, category, subCategory, sortType,search]);
+  }, [products, search, category, subCategory, sortType, search]);
 
   return (
     <div className="flex flex-col sm:flex-row gap-1 sm:gap-10 pt-10 border-t">
@@ -171,9 +172,7 @@ const applyFilters = () => {
             ))}
           </div>
         ) : (
-          <p className="text-center text-gray-500 mt-10">
-            No products found.
-          </p>
+          <p className="text-center text-gray-500 mt-10">No products found.</p>
         )}
       </div>
     </div>

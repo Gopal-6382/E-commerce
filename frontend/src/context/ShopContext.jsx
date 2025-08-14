@@ -14,7 +14,7 @@ const ShopContextProvider = ({ children }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setCartItems] = useState({}); // Object: { productId: { size: qty } }
   const [products, setProducts] = useState([]);
-
+  const [token, setToken] = useState(null);
   const navigate = useNavigate();
 
   // ✅ Add to cart
@@ -108,6 +108,8 @@ const ShopContextProvider = ({ children }) => {
     getCartCount,
     getCartAmount,
     navigate,
+    token,
+    setToken,
   };
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;

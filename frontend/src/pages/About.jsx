@@ -1,7 +1,7 @@
 import React from "react";
 import Title from "./../components/Title";
 import { assets } from "./../assets/assets";
-import NewsletterBox from './../components/NewsletterBox';
+import NewsletterBox from "./../components/NewsletterBox";
 
 const About = () => {
   return (
@@ -47,7 +47,7 @@ const About = () => {
           </p>
         </div>
 
-          <div className="border px-10 md:px-16 py-8 sm:py-20 flex flex-col gap-5">
+        <div className="border px-10 md:px-16 py-8 sm:py-20 flex flex-col gap-5">
           <b>Exceptional customer service:</b>
           <p className="text-gray-600">
             We prioritize our customers and strive to provide the best support
