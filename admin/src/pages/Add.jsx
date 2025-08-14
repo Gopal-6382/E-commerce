@@ -1,17 +1,11 @@
 import { useState } from "react";
 import { assets } from "../assets/assets";
 import axios from "axios";
-import { backendUrl } from "../config.js";
-import { toast } from "react-toastify"; // add this import at the top
-
-// ✅ Use only one backend URL source
-// const backendUrl = import.meta.env.VITE_BACKEND_URL;
+import { backendUrl } from "../config";
+import { toast } from "react-toastify";
 
 const Add = () => {
-  const [image1, setImage1] = useState(false);
-  const [image2, setImage2] = useState(false);
-  const [image3, setImage3] = useState(false);
-  const [image4, setImage4] = useState(false);
+  const [images, setImages] = useState([null, null, null, null]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -21,6 +15,23 @@ const Add = () => {
   const [bestSeller, setBestSeller] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Handle image selection
+  const handleImageChange = (index, file) => {
+    const updatedImages = [...images];
+    updatedImages[index] = file;
+    setImages(updatedImages);
+  };
+
+  // ✅ Toggle selected size
+  const toggleSize = (size) => {
+    setSizes((prev) =>
+      prev.includes(size)
+        ? prev.filter((s) => s !== size)
+        : [...prev, size]
+    );
+  };
+
+  // ✅ Handle Form Submit
   const onSubmitHandler = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -36,10 +47,9 @@ const Add = () => {
       formData.append("bestSeller", bestSeller);
       formData.append("sizes", JSON.stringify(sizes));
 
-      if (image1) formData.append("image1", image1);
-      if (image2) formData.append("image2", image2);
-      if (image3) formData.append("image3", image3);
-      if (image4) formData.append("image4", image4);
+      images.forEach((image, i) => {
+        if (image) formData.append(`image${i + 1}`, image);
+      });
 
       const token = localStorage.getItem("token");
 
@@ -54,14 +64,11 @@ const Add = () => {
         }
       );
 
-      console.log("Product added:", response.data);
+      console.log("✅ Product added:", response.data);
       toast.success("✅ Product added successfully!");
 
-      // Reset form fields
-      setImage1(false);
-      setImage2(false);
-      setImage3(false);
-      setImage4(false);
+      // Reset form
+      setImages([null, null, null, null]);
       setName("");
       setDescription("");
       setPrice("");
@@ -70,10 +77,7 @@ const Add = () => {
       setSizes([]);
       setBestSeller(false);
     } catch (error) {
-      console.error(
-        "Error adding product:",
-        error.response?.data || error.message
-      );
+      console.error("❌ Error adding product:", error.response?.data || error.message);
       toast.error("❌ Failed to add product");
     } finally {
       setLoading(false);
@@ -89,22 +93,18 @@ const Add = () => {
       <div>
         <p className="mb-2">Upload image</p>
         <div className="flex gap-2">
-          {[1, 2, 3, 4].map((num) => (
-            <label key={num} htmlFor={`image${num}`}>
+          {images.map((image, index) => (
+            <label key={index} htmlFor={`image${index}`}>
               <img
                 className="w-20"
-                src={
-                  !eval(`image${num}`)
-                    ? assets.upload_area
-                    : URL.createObjectURL(eval(`image${num}`))
-                }
+                src={image ? URL.createObjectURL(image) : assets.upload_area}
                 alt=""
               />
               <input
-                onChange={(e) => eval(`setImage${num}(e.target.files[0])`)}
                 type="file"
-                id={`image${num}`}
+                id={`image${index}`}
                 hidden
+                onChange={(e) => handleImageChange(index, e.target.files[0])}
               />
             </label>
           ))}
@@ -127,11 +127,10 @@ const Add = () => {
       {/* DESCRIPTION */}
       <div className="w-full">
         <p className="mb-2">Product Description</p>
-        <input
+        <textarea
           onChange={(e) => setDescription(e.target.value)}
           value={description}
           className="w-full h-20 max-w-[500px] px-3 py-2"
-          type="text"
           placeholder="Write Content Here"
           required
         />
@@ -181,26 +180,17 @@ const Add = () => {
         <p className="mb-2">Product Size</p>
         <div className="flex gap-3">
           {["S", "M", "L", "XL", "XXL"].map((size) => (
-            <div
+            <p
               key={size}
-              onClick={() =>
-                setSizes((prev) =>
-                  prev.includes(size)
-                    ? prev.filter((item) => item !== size)
-                    : [...prev, size]
-                )
-              }
+              onClick={() => toggleSize(size)}
+              className={`px-3 py-1 cursor-pointer ${
+                sizes.includes(size)
+                  ? "bg-gray-600 text-white"
+                  : "bg-slate-200"
+              }`}
             >
-              <p
-                className={`sizes ${
-                  sizes.includes(size)
-                    ? "bg-gray-600 text-white"
-                    : "bg-slate-200"
-                } px-3 py-1 cursor-pointer`}
-              >
-                {size}
-              </p>
-            </div>
+              {size}
+            </p>
           ))}
         </div>
       </div>

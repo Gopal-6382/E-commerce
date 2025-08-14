@@ -22,3 +22,7 @@ a.active{
   color: white;
 }
 }
+
+a.active hr{
+    display: block;
+}

@@ -32,17 +32,16 @@ const Card = () => {
         <Title text1={"Your "} text2={"Cart"} />
       </div>
       <div>
-        {cartData.map((item, index) => {
+        {cartData.map((item) => {
           const productData = products.find(
             (product) => product._id === item._id
           );
           return (
-            <div className="bg-white rounded-lg shadow p-4 mb-4">
-              {/* Put the above flex layout here */}
-              <div
-                key={index}
-                className="flex items-center justify-between gap-4 border-b py-4"
-              >
+            <div
+              key={`${item._id}-${item.size}`} // unique key here
+              className="bg-white rounded-lg shadow p-4 mb-4"
+            >
+              <div className="flex items-center justify-between gap-4 border-b py-4">
                 {/* Left: Image + Name */}
                 <div className="flex items-center gap-3 flex-1">
                   <img
@@ -99,11 +98,14 @@ const Card = () => {
         <div className="w-full sm:w-[450px]">
           <CartTotal />
           <div className="w-full text-end">
-            <button onClick={() => navigate("/place-order")} className="bg-black text-white text-sm my-8 py-3 px-8 rounded">
+            <button
+              onClick={() => navigate("/place-order")}
+              className="bg-black text-white text-sm my-8 py-3 px-8 rounded"
+            >
               Process to Checkout
             </button>
           </div>
-          </div>
+        </div>
       </div>
     </div>
   );

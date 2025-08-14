@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
-import "./Scss/tailwind.css";
+import "./tailwind.css";
 import Add from "./pages/Add";
 import List from "./pages/List";
 import Orders from "./pages/Orders";

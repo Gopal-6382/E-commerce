@@ -1,123 +1,94 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useCallback } from "react";
+import { backendUrl, currency } from "../config";
 import axios from "axios";
-import { backendUrl } from "../config";
 import { toast } from "react-toastify";
-import { Loader2, Trash2, Edit3, Search } from "lucide-react";
 
-const List = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const navigate = useNavigate();
+const List = ({ token }) => {
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Fetch products
-  const fetchProducts = async () => {
+  // ✅ Fetch product list
+  const fetchList = useCallback(async () => {
+    setLoading(true);
     try {
       const { data } = await axios.get(`${backendUrl}/api/products/list`);
       if (data.success) {
-        setProducts(data.products || []);
+        setList(data.products);
       } else {
-        toast.error("Failed to load products");
+        toast.error(data.message || "Failed to fetch products");
       }
     } catch (error) {
-      toast.error(`❌ Failed to load products: ${error.message}`);
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Delete product
-  const deleteProduct = async (id) => {
+  // ✅ Remove product
+  const removeProduct = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
+
     try {
-      const token = localStorage.getItem("token");
       const { data } = await axios.delete(`${backendUrl}/api/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (data.success) {
-        toast.success("✅ Product deleted");
-        setProducts((prev) => prev.filter((p) => p._id !== id));
+        toast.success(data.message || "Product deleted successfully");
+        setList((prev) => prev.filter((item) => item._id !== id)); // Update instantly
       } else {
-        toast.error("❌ Failed to delete");
+        toast.error(data.message || "Delete failed");
       }
     } catch (error) {
-      toast.error(`❌ Failed to delete: ${error.message}`);
+      toast.error(error.response?.data?.message || "Delete failed");
     }
   };
 
+  // ✅ Fetch on mount
   useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  // Filtered products
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(search.toLowerCase())
-  );
+    fetchList();
+  }, [fetchList]);
 
   return (
-    <div className="p-6 w-full bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-        <h1 className="text-3xl font-bold">📦 Product List</h1>
-        <div className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 shadow-sm w-full sm:w-80">
-          <Search size={18} className="text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search by product name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="outline-none flex-1 text-sm"
-          />
-        </div>
-      </div>
+    <div className="p-6 bg-white shadow rounded-lg">
+      <h2 className="mb-6 text-2xl font-semibold text-gray-800">All Products</h2>
 
-      {/* Products */}
       {loading ? (
-        <div className="flex justify-center items-center h-40 text-gray-500">
-          <Loader2 className="animate-spin w-6 h-6 mr-2" /> Loading...
-        </div>
-      ) : filteredProducts.length === 0 ? (
-        <div className="text-center text-gray-500 mt-10">
-          <p className="text-lg">No products found.</p>
-        </div>
+        <p className="text-gray-500">Loading products...</p>
+      ) : list.length === 0 ? (
+        <p className="text-gray-500">No products found.</p>
       ) : (
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-100 border-b">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 border">
+            <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-3">Image</th>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Price</th>
-                <th className="px-4 py-3">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Action</th>
               </tr>
             </thead>
-            <tbody>
-              {filteredProducts.map((product) => (
-                <tr key={product._id} className="border-b hover:bg-gray-50">
+            <tbody className="bg-white divide-y divide-gray-200">
+              {list.map((product) => (
+                <tr key={product._id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3">
                     <img
-                      src={product.images?.[0] || "/placeholder.png"}
+                      src={product.image?.[0]}
                       alt={product.name}
-                      className="w-14 h-14 object-cover rounded-md"
+                      className="w-12 h-12 object-cover rounded"
                     />
                   </td>
-                  <td className="px-4 py-3">{product.name}</td>
-                  <td className="px-4 py-3">{product.category}</td>
-                  <td className="px-4 py-3 font-semibold">₹{product.price}</td>
-                  <td className="px-4 py-3 flex gap-3">
+                  <td className="px-4 py-3 font-medium text-gray-900">{product.name}</td>
+                  <td className="px-4 py-3 text-gray-600">{product.category}</td>
+                  <td className="px-4 py-3 font-semibold text-gray-900">
+                    {currency}{product.price}
+                  </td>
+                  <td className="px-4 py-3 text-center">
                     <button
-                      onClick={() => navigate(`/edit-product/${product._id}`)}
-                      className="flex items-center gap-1 text-blue-500 hover:text-blue-700"
+                      onClick={() => removeProduct(product._id)}
+                      className="bg-red-500 text-white px-4 py-1.5 rounded-full hover:bg-red-600 transition"
                     >
-                      <Edit3 size={16} /> Edit
-                    </button>
-                    <button
-                      onClick={() => deleteProduct(product._id)}
-                      className="flex items-center gap-1 text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 size={16} /> Delete
+                      Delete
                     </button>
                   </td>
                 </tr>

@@ -1,16 +1,23 @@
 import { createContext, useEffect, useState } from "react";
-import { products } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import { backendUrl } from "../../config.js";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 export const ShopContext = createContext();
 
 const ShopContextProvider = ({ children }) => {
   const currency = "$";
   const delivery_fee = 10;
+
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [cartItems, setCartItems] = useState({}); // changed to object
+  const [cartItems, setCartItems] = useState({}); // Object: { productId: { size: qty } }
+  const [products, setProducts] = useState([]);
+
   const navigate = useNavigate();
+
+  // ✅ Add to cart
   const addToCart = (itemId, size) => {
     let cartData = structuredClone(cartItems);
 
@@ -21,32 +28,13 @@ const ShopContextProvider = ({ children }) => {
         cartData[itemId][size] = 1;
       }
     } else {
-      cartData[itemId] = {};
-      cartData[itemId][size] = 1;
+      cartData[itemId] = { [size]: 1 };
     }
 
     setCartItems(cartData);
   };
 
-  useEffect(() => {
-    // console.log("Cart items updated:", cartItems);
-  }, [cartItems]);
-
-  const getCartCount = () => {
-    let totalCount = 0;
-    for (const items in cartItems) {
-      for (const size in cartItems[items]) {
-        try {
-          if (cartItems[items][size] > 0) {
-            totalCount += cartItems[items][size];
-          }
-        } catch (error) {
-          console.error("Error getting cart count:", error);
-        }
-      }
-    }
-    return totalCount;
-  };
+  // ✅ Update quantity
   const updateQuantity = (itemId, size, quantity) => {
     let cartData = structuredClone(cartItems);
 
@@ -57,22 +45,54 @@ const ShopContextProvider = ({ children }) => {
     setCartItems(cartData);
   };
 
-  const getCartAmount =  () => {
+  // ✅ Get total cart item count
+  const getCartCount = () => {
+    let totalCount = 0;
+    for (const items in cartItems) {
+      for (const size in cartItems[items]) {
+        if (cartItems[items][size] > 0) {
+          totalCount += cartItems[items][size];
+        }
+      }
+    }
+    return totalCount;
+  };
+
+  // ✅ Get total cart amount
+  const getCartAmount = () => {
     let totalAmount = 0;
     for (const items in cartItems) {
-        let itemInfo = products.find((product) => product._id === items);
-        for (const item in cartItems[items]) {
-          try {
-            if (cartItems[items][item] > 0) {
-              totalAmount += itemInfo.price * cartItems[items][item];
-            }
-          } catch (error) {
-            console.error("Error calculating cart amount:", error);
+      const itemInfo = products.find((p) => p._id === items);
+      if (!itemInfo) continue; // Skip if product not found
+
+      for (const size in cartItems[items]) {
+        if (cartItems[items][size] > 0) {
+          totalAmount += itemInfo.price * cartItems[items][size];
         }
       }
     }
     return totalAmount;
   };
+
+  // ✅ Fetch products from backend
+  const getProductsData = async () => {
+    try {
+      const response = await axios.get(`${backendUrl}/api/products/list`);
+      if (response.data.success) {
+        setProducts(response.data.products);
+      } else {
+        toast.error(response.data.message || "Failed to fetch products");
+      }
+    } catch (error) {
+      toast.error(error.message || "Error fetching products");
+    }
+  };
+
+  // ✅ Load products on mount
+  useEffect(() => {
+    getProductsData();
+  }, []);
+
   const value = {
     products,
     currency,
@@ -83,9 +103,9 @@ const ShopContextProvider = ({ children }) => {
     setShowSearch,
     cartItems,
     setCartItems,
-    addToCart, // ✅ now exposed in context
-    getCartCount, // Expose the function to get cart count
-    updateQuantity, // Expose the function to update item quantity
+    addToCart,
+    updateQuantity,
+    getCartCount,
     getCartAmount,
     navigate,
   };
