@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { backendUrl } from "../../config";
 import { ShopContext } from "../context/ShopContext";
 import axios from "axios";
@@ -64,7 +64,12 @@ const Login = () => {
       setLoading(false);
     }
   };
-
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    navigate("/");
+  }
+}, []);
   return (
     <form
       onSubmit={OnSubmitHandler}

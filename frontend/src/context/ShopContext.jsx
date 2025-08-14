@@ -12,86 +12,139 @@ const ShopContextProvider = ({ children }) => {
 
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [cartItems, setCartItems] = useState({}); // Object: { productId: { size: qty } }
+  const [cartItems, setCartItems] = useState({});
   const [products, setProducts] = useState([]);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
   const navigate = useNavigate();
 
-  // ✅ Add to cart
-  const addToCart = (itemId, size) => {
-    let cartData = structuredClone(cartItems);
+  // Add to cart
+  const addToCart = async (itemId, size) => {
+    const latestToken = localStorage.getItem("token");
 
-    if (cartData[itemId]) {
-      if (cartData[itemId][size]) {
-        cartData[itemId][size] += 1;
+    if (!latestToken) {
+      toast.info("Please login or signup to continue");
+      navigate("/login");
+      return;
+    }
+
+    let cartData = structuredClone(cartItems);
+    cartData[itemId] = {
+      ...cartData[itemId],
+      [size]: (cartData[itemId]?.[size] || 0) + 1,
+    };
+    setCartItems(cartData);
+
+    try {
+      await axios.post(
+        `${backendUrl}/api/cart/add`,
+        { itemId, size },
+        { headers: { Authorization: `Bearer ${latestToken}` } }
+      );
+      toast.success("Item added to cart");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Error adding item to cart");
+    }
+  };
+
+  // Update cart quantity
+  const updateQuantity = async (itemId, size, quantity) => {
+    const latestToken = localStorage.getItem("token");
+    if (!latestToken) {
+      toast.info("Please login or signup to continue");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await axios.post(
+        `${backendUrl}/api/cart/update`,
+        { itemId, size, quantity },
+        { headers: { Authorization: `Bearer ${latestToken}` } }
+      );
+
+      const cartData = structuredClone(cartItems);
+      if (quantity <= 0) {
+        delete cartData[itemId][size];
+        if (Object.keys(cartData[itemId]).length === 0) delete cartData[itemId];
       } else {
-        cartData[itemId][size] = 1;
+        if (!cartData[itemId]) cartData[itemId] = {};
+        cartData[itemId][size] = quantity;
       }
-    } else {
-      cartData[itemId] = { [size]: 1 };
-    }
 
-    setCartItems(cartData);
+      setCartItems(cartData);
+      toast.success("Cart updated successfully");
+      console.log("Updated cart data:", cartData);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Error updating cart");
+    }
   };
 
-  // ✅ Update quantity
-  const updateQuantity = (itemId, size, quantity) => {
-    let cartData = structuredClone(cartItems);
-
-    if (cartData[itemId] && cartData[itemId][size]) {
-      cartData[itemId][size] = quantity;
-    }
-
-    setCartItems(cartData);
-  };
-
-  // ✅ Get total cart item count
+  // Get total cart count
   const getCartCount = () => {
     let totalCount = 0;
-    for (const items in cartItems) {
-      for (const size in cartItems[items]) {
-        if (cartItems[items][size] > 0) {
-          totalCount += cartItems[items][size];
-        }
+    for (const itemId in cartItems) {
+      for (const size in cartItems[itemId]) {
+        totalCount += cartItems[itemId][size];
       }
     }
     return totalCount;
   };
 
-  // ✅ Get total cart amount
+  // Get total cart amount
   const getCartAmount = () => {
     let totalAmount = 0;
-    for (const items in cartItems) {
-      const itemInfo = products.find((p) => p._id === items);
-      if (!itemInfo) continue; // Skip if product not found
+    for (const itemId in cartItems) {
+      const product = products.find((p) => p._id === itemId);
+      if (!product) continue;
 
-      for (const size in cartItems[items]) {
-        if (cartItems[items][size] > 0) {
-          totalAmount += itemInfo.price * cartItems[items][size];
-        }
+      for (const size in cartItems[itemId]) {
+        totalAmount += product.price * cartItems[itemId][size];
       }
     }
     return totalAmount;
   };
 
-  // ✅ Fetch products from backend
+  // Fetch products
   const getProductsData = async () => {
     try {
       const response = await axios.get(`${backendUrl}/api/products/list`);
       if (response.data.success) {
+        console.log("Fetched products:", response.data.products);
         setProducts(response.data.products);
-      } else {
-        toast.error(response.data.message || "Failed to fetch products");
-      }
+      } else toast.error(response.data.message || "Failed to fetch products");
     } catch (error) {
       toast.error(error.message || "Error fetching products");
     }
   };
 
-  // ✅ Load products on mount
+  const getUserCart = async () => {
+  try {
+    const response = await axios.post(
+      `${backendUrl}/api/cart/get`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    // Use the correct key from backend response
+    setCartItems(response.data.cartData);
+  } catch (error) {
+    console.error("Error fetching cart:", error);
+  }
+};
+
+
   useEffect(() => {
     getProductsData();
   }, []);
+
+  useEffect(() => {
+    if (token) localStorage.setItem("token", token);
+    else localStorage.removeItem("token");
+    if (token) getUserCart();
+  }, [token]);
 
   const value = {
     products,

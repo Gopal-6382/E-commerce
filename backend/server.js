@@ -66,10 +66,12 @@ if (rateLimit) {
 // Import routes
 import userRouter from './routes/userRoute.js';
 import productRouter from './routes/productRoute.js';
+import cartRouter from './routes/cartRoute.js';
 
 // Routes
 app.use('/api/users', userRouter);
 app.use('/api/products', productRouter);
+app.use('/api/cart', cartRouter);
 
 // Basic route
 app.get('/', (req, res) => {
