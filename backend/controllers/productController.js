@@ -1,8 +1,8 @@
 import Product from "../models/productModel.js";
 import cloudinary from "../config/cloudinary.js";
-import fs from "fs";
-
 // Add Product
+
+
 const addProduct = async (req, res) => {
   try {
     const { name, description, price, category, subCategory, sizes, bestseller } = req.body;
@@ -23,18 +23,26 @@ const addProduct = async (req, res) => {
       return res.status(400).json({ success: false, message: "At least one image is required" });
     }
 
-    const images = Object.values(req.files).map(file => file[0]?.path);
+    // Flatten files array
+    const filesArray = Object.values(req.files).flat();
 
-    // Upload images to Cloudinary
-    const imagesUrl = await Promise.all(images.map(async (image) => {
-      const result = await cloudinary.uploader.upload(image, {
-        folder: "ecommerce/products",
-        resource_type: "image"
+    // Upload to Cloudinary from buffer
+    const imagesUrl = [];
+    for (const file of filesArray) {
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "ecommerce/products" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(file.buffer);
       });
-      fs.unlinkSync(image); // Remove local file
-      return result.secure_url;
-    }));
+      imagesUrl.push(result.secure_url);
+    }
 
+    // Create product
     const product = new Product({
       name,
       description,
@@ -44,7 +52,7 @@ const addProduct = async (req, res) => {
       subCategory,
       sizes: sizesArray,
       bestseller: bestseller === "true",
-      date: Date.now()
+      date: Date.now(),
     });
 
     await product.save();
@@ -56,6 +64,9 @@ const addProduct = async (req, res) => {
     res.status(500).json({ success: false, message: error.message || "Server error" });
   }
 };
+
+
+
 
 // List Products
 const listProducts = async (req, res) => {
