@@ -1,6 +1,6 @@
 import multer from "multer";
 
-// Memory storage for Vercel
+// Memory storage (no uploads folder)
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
