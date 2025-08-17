@@ -55,78 +55,73 @@ const Orders = () => {
         <Title text1="My" text2="Orders" />
       </div>
       <div>
-       {orders.map((order, orderIndex) =>
-  order.items.map((item, itemIndex) => (
-    <div
-      key={`${orderIndex}-${itemIndex}`}
-      className="border-t border-b text-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4 py-4"
-    >
-      {/* Product Image */}
-      <div className="flex items-start gap-6 text-sm">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="w-16 sm:w-20 object-cover"
-        />
-      </div>
+        {orders.map((order, orderIndex) =>
+          order.items.map((item, itemIndex) => (
+            <div
+              key={`${orderIndex}-${itemIndex}`}
+              className="border-t border-b text-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4 py-4"
+            >
+              {/* Product Image */}
+              <div className="flex items-start gap-6 text-sm">
+                <img src={item.image[0]} alt={item.name} />
+              </div>
 
-      {/* Product Name */}
-      <p className="sm:text-base font-medium">{item.name}</p>
+              {/* Product Name */}
+              <p className="sm:text-base font-medium">{item.name}</p>
 
-      {/* Price / Quantity / Size */}
-      <div className="flex items-center gap-3 mt-2 text-base text-gray-700">
-        <p>
-          {currency}
-          {item.price}
-        </p>
-        <p>Quantity: {item.quantity}</p>
-        <p>Size: {item.size}</p>
-      </div>
+              {/* Price / Quantity / Size */}
+              <div className="flex items-center gap-3 mt-2 text-base text-gray-700">
+                <p>
+                  {currency}
+                  {item.price}
+                </p>
+                <p>Quantity: {item.quantity}</p>
+                <p>Size: {item.size}</p>
+              </div>
 
-      {/* Order Date */}
-      <p className="mt-2">
-        Date:{" "}
-        <span className="text-gray-400">
-          {new Date(order.date).toLocaleDateString()}
-        </span>
-      </p>
+              {/* Order Date */}
+              <p className="mt-2">
+                Date:{" "}
+                <span className="text-gray-400">
+                  {new Date(order.date).toLocaleDateString()}
+                </span>
+              </p>
 
-      {/* Payment Method */}
-      <p className="mt-2">
-        Payment:{" "}
-        <span className="text-gray-400">
-          {order.paymentMethod} {order.payment ? "(Paid)" : "(Pending)"}
-        </span>
-      </p>
+              {/* Payment Method */}
+              <p className="mt-2">
+                Payment:{" "}
+                <span className="text-gray-400">
+                  {order.paymentMethod} {order.payment ? "(Paid)" : "(Pending)"}
+                </span>
+              </p>
 
-      {/* Status + Track Button */}
-      <div className="md:w-1/2 flex justify-between">
-        <div className="flex items-center gap-2">
-          <p
-            className={`min-w-2 h-2 rounded-full ${
-              order.status === "Order Placed"
-                ? "bg-yellow-500"
-                : order.status === "Shipped"
-                ? "bg-blue-500"
-                : order.status === "Delivered"
-                ? "bg-green-500"
-                : "bg-gray-400"
-            }`}
-          ></p>
-          <p className="text-sm md:text-base">{order.status}</p>
-        </div>
-        <button
-          type="button"
-          onClick={handleTrackOrder}
-          className="text-sm border bg-black px-4 p-2 font-medium rounded-sm text-white hover:underline"
-        >
-          Track Order
-        </button>
-      </div>
-    </div>
-  ))
-)}
-
+              {/* Status + Track Button */}
+              <div className="md:w-1/2 flex justify-between">
+                <div className="flex items-center gap-2">
+                  <p
+                    className={`min-w-2 h-2 rounded-full ${
+                      order.status === "Order Placed"
+                        ? "bg-yellow-500"
+                        : order.status === "Shipped"
+                        ? "bg-blue-500"
+                        : order.status === "Delivered"
+                        ? "bg-green-500"
+                        : "bg-gray-400"
+                    }`}
+                  ></p>
+                  <p className="text-sm md:text-base">{order.status}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleTrackOrder}
+                  className="text-sm border bg-black px-4 p-2 font-medium rounded-sm text-white hover:underline"
+                >
+                  Track Order
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
