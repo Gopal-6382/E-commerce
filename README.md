@@ -19,8 +19,6 @@ A full-featured **e-commerce platform** built with the **MERN stack** and **Tail
 - **Backend:** Node.js, Express.js  
 - **Database:** MongoDB  
 - **Authentication:** JWT (JSON Web Tokens)  
-- **Payments:** Stripe / PayPal (update as per your implementation)  
+- **Payments:** Stripe / Razorpay (update as per your implementation)  
 
----
 
-## 📂 Project Structure
